@@ -77,3 +77,42 @@ export interface CreateStockMovement {
   reason?: string;
   reference?: string;
 }
+
+export type CustomerDocumentType = "DNI" | "RUC" | "CE" | "OTRO";
+
+export interface Customer {
+  id: string;
+  company_id: string;
+  document_type: CustomerDocumentType;
+  document_number: string | null;
+  first_name: string;
+  last_name: string | null;
+  business_name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SupplierDocumentType =
+  | "RUC"
+  | "DNI"
+  | "CE"
+  | "OTRO";
+
+export interface Supplier {
+  id: string;
+  company_id: string;
+  document_type: SupplierDocumentType;
+  document_number: string | null;
+  business_name: string;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
