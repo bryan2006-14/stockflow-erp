@@ -1,13 +1,16 @@
 "use client";
 
 import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  Tooltip,
+  Bar,
+  BarChart,
   CartesianGrid,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts";
+
+import { useCommercialDashboard } from "@/hooks/dashboard/useCommercialDashboard";
 
 import {
   Card,
@@ -16,38 +19,67 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const data = [
-  { month: "Ene", sales: 4200 },
-  { month: "Feb", sales: 5100 },
-  { month: "Mar", sales: 4800 },
-  { month: "Abr", sales: 6300 },
-  { month: "May", sales: 7200 },
-  { month: "Jun", sales: 8100 },
-];
+const currencyFormatter = new Intl.NumberFormat("es-PE", {
+  style: "currency",
+  currency: "PEN",
+  maximumFractionDigits: 0,
+});
 
 export function SalesChart() {
+  const { chartData, loading } =
+    useCommercialDashboard();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ventas últimos 6 meses</CardTitle>
+        <CardTitle>
+          Ventas y compras — últimos 6 meses
+        </CardTitle>
       </CardHeader>
 
-      <CardContent className="h-[350px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
+      <CardContent className="h-[360px]">
+        {loading ? (
+          <div className="h-full animate-pulse rounded-xl bg-muted/50" />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={chartData}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+              />
 
-            <XAxis dataKey="month" />
+              <XAxis dataKey="month" />
 
-            <Tooltip />
+              <YAxis
+                tickFormatter={(value) =>
+                  `S/${Number(value).toLocaleString("es-PE")}`
+                }
+              />
 
-            <Line
-              type="monotone"
-              dataKey="sales"
-              strokeWidth={3}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+              <Tooltip
+                formatter={(value) =>
+                  currencyFormatter.format(Number(value))
+                }
+              />
+
+              <Bar
+                dataKey="sales"
+                name="Ventas"
+                fill="currentColor"
+                className="text-emerald-500"
+                radius={[6, 6, 0, 0]}
+              />
+
+              <Bar
+                dataKey="purchases"
+                name="Compras"
+                fill="currentColor"
+                className="text-indigo-500"
+                radius={[6, 6, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </CardContent>
     </Card>
   );
