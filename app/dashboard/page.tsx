@@ -1,8 +1,11 @@
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { CommercialMetrics } from "@/components/dashboard/CommercialMetrics";
 import { InventoryMetrics } from "@/components/dashboard/InventoryMetrics";
+import { LatestPurchases } from "@/components/dashboard/LatestPurchases";
+import { LatestSales } from "@/components/dashboard/LatestSales";
 import { LowStockTable } from "@/components/dashboard/LowStockTable";
 import { SalesChart } from "@/components/dashboard/SalesChart";
+import { TopProducts } from "@/components/dashboard/TopProducts";
 
 export default function DashboardPage() {
   return (
@@ -16,34 +19,33 @@ export default function DashboardPage() {
           </h2>
 
           <p className="text-sm text-muted-foreground">
-            Ventas, compras, clientes y resultado mensual.
+            Rendimiento general de ventas y compras.
           </p>
         </div>
 
         <CommercialMetrics />
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2">
           <SalesChart />
         </div>
 
         <LowStockTable />
       </div>
 
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold">
-            Resumen de inventario
-          </h2>
+      <div className="grid gap-6 xl:grid-cols-2">
+        <LatestSales />
+        <LatestPurchases />
+      </div>
 
-          <p className="text-sm text-muted-foreground">
-            Estado y valorización actual del stock.
-          </p>
+      <div className="grid gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <InventoryMetrics />
         </div>
 
-        <InventoryMetrics />
-      </section>
+        <TopProducts />
+      </div>
     </div>
   );
 }

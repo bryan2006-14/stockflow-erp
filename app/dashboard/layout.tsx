@@ -13,9 +13,9 @@ export default function DashboardLayout({
       <div className="flex flex-1 flex-col">
         <AppNavbar />
 
-        <main className="flex-1 bg-muted/20 p-6">
-          {children}
-        </main>
+        <main className="min-w-0 flex-1 bg-muted/30 p-4 md:p-6 lg:p-8">
+  {children}
+</main>
       </div>
     </div>
   );

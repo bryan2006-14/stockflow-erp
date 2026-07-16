@@ -224,6 +224,104 @@ async getMonthlyCommercialData(): Promise<MonthlyCommercialData[]> {
   });
 },
 
+async getLatestSales(): Promise<LatestSale[]> {
+  const { data, error } = await supabase
+    .from("sales")
+    .select(`
+      id,
+      sale_number,
+      total,
+      created_at,
+      customers (
+        first_name,
+        last_name,
+        business_name
+      )
+    `)
+    .eq("status", "completed")
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (error) throw error;
+
+  return (data ?? []).map((sale) => ({
+    ...sale,
+    total: Number(sale.total),
+    customers: Array.isArray(sale.customers)
+      ? sale.customers[0] ?? null
+      : sale.customers,
+  })) as LatestSale[];
+},
+
+async getLatestPurchases(): Promise<LatestPurchase[]> {
+  const { data, error } = await supabase
+    .from("purchases")
+    .select(`
+      id,
+      purchase_number,
+      total,
+      created_at,
+      suppliers (
+        business_name
+      )
+    `)
+    .eq("status", "completed")
+    .order("created_at", { ascending: false })
+    .limit(5);
+
+  if (error) throw error;
+
+  return (data ?? []).map((purchase) => ({
+    ...purchase,
+    total: Number(purchase.total),
+    suppliers: Array.isArray(purchase.suppliers)
+      ? purchase.suppliers[0] ?? null
+      : purchase.suppliers,
+  })) as LatestPurchase[];
+},
+
+async getTopSellingProducts(): Promise<TopSellingProduct[]> {
+  const { data, error } = await supabase
+    .from("sale_items")
+    .select(`
+      product_id,
+      product_name,
+      product_sku,
+      quantity,
+      subtotal,
+      sales!inner (
+        status
+      )
+    `)
+    .eq("sales.status", "completed");
+
+  if (error) throw error;
+
+  const grouped = new Map<string, TopSellingProduct>();
+
+  for (const item of data ?? []) {
+    const key = item.product_id ?? item.product_sku;
+    const current = grouped.get(key);
+
+    if (current) {
+      current.quantity += Number(item.quantity);
+      current.total += Number(item.subtotal);
+    } else {
+      grouped.set(key, {
+        product_id: item.product_id,
+        product_name: item.product_name,
+        product_sku: item.product_sku,
+        quantity: Number(item.quantity),
+        total: Number(item.subtotal),
+      });
+    }
+  }
+
+  return Array.from(grouped.values())
+    .sort((a, b) => b.quantity - a.quantity)
+    .slice(0, 5);
+},
+
   async getMetrics(): Promise<DashboardMetrics> {
     const [
       totalProducts,
@@ -279,3 +377,34 @@ async getMonthlyCommercialData(): Promise<MonthlyCommercialData[]> {
     };
   },
 };
+
+
+export interface LatestSale {
+  id: string;
+  sale_number: string;
+  total: number;
+  created_at: string;
+  customers: {
+    first_name: string;
+    last_name: string | null;
+    business_name: string | null;
+  } | null;
+}
+
+export interface LatestPurchase {
+  id: string;
+  purchase_number: string;
+  total: number;
+  created_at: string;
+  suppliers: {
+    business_name: string;
+  } | null;
+}
+
+export interface TopSellingProduct {
+  product_id: string | null;
+  product_name: string;
+  product_sku: string;
+  quantity: number;
+  total: number;
+}
